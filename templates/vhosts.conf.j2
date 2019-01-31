@@ -1,0 +1,19 @@
+server {
+  listen 80;
+  server_name {{ item }};
+
+  root /var/www/html;
+  index index.html index.htm index.nginx-debian.html;
+
+  location ~* \.(jpg|jpeg|gif|css|png|js|ico|html)$ {
+    expires max;
+  }
+
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+
+  access_log /var/log/nginx/{{ item }}.access.log graylog;
+  error_log  /var/log/nginx/{{ item }}.error.log;
+}
+

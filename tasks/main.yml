@@ -1,0 +1,30 @@
+---
+- name: Add Nginx repo apt key
+  apt_key: url=http://nginx.org/keys/nginx_signing.key state=present
+
+- name: Add Nginx repo
+  apt_repository:
+   repo: "deb http://nginx.org/packages/ubuntu/ xenial nginx"
+   state: present
+   update_cache: yes
+
+- name: Install Nginx
+  apt: name="nginx={{ nginx.version }}" state=present update_cache=yes
+
+- name: Checking if Nginx includes folder exists
+  stat: path=/etc/nginx/conf.d
+  register: nginx_includes
+
+- name: Lets see what inside
+  debug: var=nginx_includes
+
+- name: Creating Nginx includes folder
+  file: path="{{ nginx_includes.stat.path }}" state=directory owner=root group=root mode=0755 recurse=yes
+  when: nginx_includes.stat.exists == False
+
+- name: Copy nginx.conf template to server
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf owner=root group=root mode=0644
+  notify: restart nginx
+
+
+# tasks file for deploy_nginx
